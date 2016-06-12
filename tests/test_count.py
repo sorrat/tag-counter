@@ -1,4 +1,6 @@
 from tag_counter.count import count_tags, count_tags_in_string
+from helpers import assert_lists_equal
+
 
 EXAMPLE_PAGE = '''
 <!doctype html>
@@ -21,7 +23,7 @@ EXAMPLE_PAGE = '''
 </html>
 '''
 
-EXAMPLE_PAGE_TAGS = sorted([
+EXAMPLE_PAGE_TAG_COUNTS = (
     ('html', 1),
     ('head', 1),
     ('title', 1),
@@ -32,19 +34,25 @@ EXAMPLE_PAGE_TAGS = sorted([
     ('h1', 1),
     ('p', 2),
     ('a', 1),
-])
+)
 
 
 def test_count_tags_in_string():
-    assert sorted(count_tags_in_string(EXAMPLE_PAGE)) == EXAMPLE_PAGE_TAGS
+    assert_lists_equal(
+        EXAMPLE_PAGE_TAG_COUNTS,
+        count_tags_in_string(EXAMPLE_PAGE)
+    )
 
 
 def test_count_tags(db, monkeypatch):
     url = 'http://example.org'
 
-    assert db.read_counts(url) == []
+    assert db.read_counts(url) == []  # db is empty
 
     monkeypatch.setattr('tag_counter.count.readpage', lambda url: EXAMPLE_PAGE)
     count_tags(url)
 
-    counts = sorted(db.read_counts(url)) == EXAMPLE_PAGE_TAGS
+    assert_lists_equal(
+        EXAMPLE_PAGE_TAG_COUNTS,
+        db.read_counts(url)
+    )

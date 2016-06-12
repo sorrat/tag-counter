@@ -1,3 +1,4 @@
+import json
 import sqlite3
 
 from tag_counter import settings
@@ -14,24 +15,18 @@ class Db(object):
             'DROP TABLE IF EXISTS tag_counts')
         self.conn.execute(
             'CREATE TABLE tag_counts '
-            '(url text, tag text, count integer)')
-        self.conn.execute(
-            'CREATE UNIQUE INDEX url_tag_idx '
-            'ON tag_counts (url, tag)')
+            '(url text PRIMARY KEY, counts text)')
 
     def insert_counts(self, url, counts):
-        values = (
-            [url, tag, count]
-            for tag, count in counts
-        )
-
-        self.conn.executemany(
-            'REPLACE INTO tag_counts (url, tag, count) VALUES (?,?,?)',
-            values)
+        counts_dump = json.dumps(counts)
+        self.conn.execute(
+            'REPLACE INTO tag_counts (url, counts) VALUES (?,?)',
+            [url, counts_dump])
         self.conn.commit()
 
     def read_counts(self, url):
         cursor = self.conn.execute(
-            'SELECT tag, count FROM tag_counts WHERE url=?', [url])
+            'SELECT counts FROM tag_counts WHERE url=?', [url])
 
-        return cursor.fetchall()
+        record = cursor.fetchone()
+        return json.loads(record[0]) if record else []

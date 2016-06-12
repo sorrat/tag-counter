@@ -20,12 +20,10 @@ def cmdline_args():
     parser = argparse.ArgumentParser(description='Tag counter')
     parser.add_argument('--reset-db', action='store_true',
                         help='Reset DB to initial state. And create schema')
-
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--get', dest='url_to_get', type=url_with_schema,
-                       help='URL of website to count tags from')
-    group.add_argument('--view', dest='url_to_view', type=url_with_schema,
-                       help='View results')
+    parser.add_argument('--get', dest='url_to_get', type=url_with_schema,
+                        help='URL of website to count tags from')
+    parser.add_argument('--view', dest='url_to_view', type=url_with_schema,
+                        help='View results')
     return parser.parse_args()
 
 
